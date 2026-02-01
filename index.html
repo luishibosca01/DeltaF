@@ -11,8 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Gestión de Servicios</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d
         3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVm
         cz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRTIiB4MT0iMCUiIHkxPSIwJSIgeDI9
         IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2
@@ -994,7 +993,7 @@
                 </svg>
                 Cerrar menú
             </button>
-            <div class="menu-version">Version 0.14v2</div>
+            <div class="menu-version">Version 0.15</div>
         </div>
     </div>
 
@@ -1541,6 +1540,13 @@
                 // Guardar posición de scroll antes de actualizar
                 const scrollPos = window.scrollY || window.pageYOffset;
 
+                // Guardar el estado de los colapsos abiertos
+                const colapsosAbiertos = [];
+                document.querySelectorAll('.facturas-colapso.active').forEach(colapso => {
+                    const servicioId = colapso.id.replace('facturas-', '');
+                    colapsosAbiertos.push(servicioId);
+                });
+
                 const lista = document.getElementById('servicios-lista');
 
                 if (this.servicios.length === 0) {
@@ -1557,19 +1563,9 @@
                     return;
                 }
 
-                // Ordenar servicios por fecha de vencimiento más próxima
+                // Ordenar servicios alfabéticamente por nombre (A-Z)
                 const serviciosOrdenados = [...this.servicios].sort((a, b) => {
-                    const facturaA = this.obtenerUltimaFactura(a.id);
-                    const facturaB = this.obtenerUltimaFactura(b.id);
-
-                    if (!facturaA && !facturaB) return 0;
-                    if (!facturaA) return 1;
-                    if (!facturaB) return -1;
-
-                    if (facturaA.pagada && !facturaB.pagada) return 1;
-                    if (!facturaA.pagada && facturaB.pagada) return -1;
-
-                    return new Date(facturaA.fecha) - new Date(facturaB.fecha);
+                    return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
                 });
 
                 lista.innerHTML = serviciosOrdenados.map(servicio => {
@@ -1673,12 +1669,121 @@
                     });
                 });
 
-                // Restaurar posición de scroll después de actualizar
+                // Restaurar posición de scroll y colapsos abiertos
                 requestAnimationFrame(() => {
                     window.scrollTo(0, scrollPos);
+
+                    // Restaurar los colapsos que estaban abiertos
+                    colapsosAbiertos.forEach(servicioId => {
+                        const colapso = document.getElementById(`facturas-${servicioId}`);
+                        const servicioItem = document.querySelector(`.servicio-item[data-id="${servicioId}"]`);
+
+                        if (colapso && servicioItem) {
+                            colapso.classList.add('active');
+                            servicioItem.classList.add('expanded');
+                        }
+                    });
                 });
 
                 this.actualizarResumenMes();
+                // Restaurar colapsos abiertos
+                requestAnimationFrame(() => {
+                    this.restaurarColapsos();
+                });
+            }
+
+            actualizarServicioIndividual(servicioId) {
+                const servicio = this.servicios.find(s => s.id === servicioId);
+                if (!servicio) return;
+
+                const wrapper = document.querySelector(`.servicio-wrapper[data-id="${servicioId}"]`);
+                if (!wrapper) return;
+
+                // Actualizar header del servicio
+                const ultimaFactura = this.obtenerUltimaFactura(servicio.id);
+                let estado = '', claseEstado = '', montoTexto = 'Sin facturas', fechaTexto = '';
+
+                if (ultimaFactura) {
+                    montoTexto = this.formatearMoneda(ultimaFactura.monto);
+                    fechaTexto = this.formatearFecha(ultimaFactura.fecha);
+
+                    if (ultimaFactura.pagada) {
+                        const fechaPagoTexto = ultimaFactura.fechaPago
+                            ? this.formatearFecha(ultimaFactura.fechaPago)
+                            : 'Sin fecha';
+                        estado = `Pagado ${fechaPagoTexto}`;
+                        claseEstado = 'pagado';
+                    } else {
+                        const hoy = new Date();
+                        hoy.setHours(0, 0, 0, 0);
+                        const vencimiento = new Date(ultimaFactura.fecha + 'T00:00:00');
+                        vencimiento.setHours(0, 0, 0, 0);
+                        const diasRestantes = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+
+                        if (diasRestantes < 0) {
+                            estado = 'Vencido';
+                            claseEstado = 'vencido';
+                        } else if (diasRestantes === 0) {
+                            estado = 'Vence hoy';
+                            claseEstado = 'urgente';
+                        } else if (diasRestantes === 1) {
+                            estado = 'Vence mañana';
+                            claseEstado = 'urgente';
+                        } else if (diasRestantes === 2) {
+                            estado = 'Vence en 2 días';
+                            claseEstado = 'urgente';
+                        } else if (diasRestantes <= 7) {
+                            estado = `Vence en ${diasRestantes} días`;
+                            claseEstado = 'proximo';
+                        } else {
+                            estado = `Vence ${fechaTexto}`;
+                            claseEstado = 'lejano';
+                        }
+                    }
+                }
+
+                // Actualizar el servicio-item manteniendo el estado expanded
+                const servicioItem = wrapper.querySelector('.servicio-item');
+                const estaExpandido = servicioItem.classList.contains('expanded');
+
+                servicioItem.className = `servicio-item ${claseEstado}`;
+                if (estaExpandido) {
+                    servicioItem.classList.add('expanded');
+                }
+
+                servicioItem.querySelector('.servicio-nombre').textContent = servicio.nombre;
+                servicioItem.querySelector('.servicio-monto').textContent = montoTexto;
+
+                const infoDiv = servicioItem.querySelector('.servicio-info');
+                const fechaSpan = infoDiv.querySelector('.servicio-fecha');
+                if (fechaTexto) {
+                    if (fechaSpan) {
+                        fechaSpan.textContent = fechaTexto;
+                    } else {
+                        infoDiv.innerHTML += `<span class="servicio-fecha">${fechaTexto}</span>`;
+                    }
+                } else if (fechaSpan) {
+                    fechaSpan.remove();
+                }
+
+                const estadoElement = servicioItem.querySelector('.servicio-estado');
+                if (estado) {
+                    if (estadoElement) {
+                        estadoElement.className = `servicio-estado estado-${claseEstado}`;
+                        estadoElement.textContent = estado;
+                    } else {
+                        servicioItem.innerHTML += `<span class="servicio-estado estado-${claseEstado}">${estado}</span>`;
+                    }
+                } else if (estadoElement) {
+                    estadoElement.remove();
+                }
+
+                // Actualizar SOLO el contenido de facturas (SIN tocar el colapso)
+                const facturasContent = wrapper.querySelector('.facturas-colapso-content');
+                const facturasHTML = this.generarFacturasHTML(servicio);
+                const btnAddFactura = `<button class="btn-add-factura" onclick="event.stopPropagation(); app.abrirModalFactura('${servicio.id}', null)" title="Agregar factura">+</button>`;
+
+                facturasContent.innerHTML = facturasHTML + btnAddFactura;
             }
 
             generarFacturasHTML(servicio) {
@@ -1744,6 +1849,9 @@
                     colapso.classList.toggle('active');
                     servicioItem.classList.toggle('expanded');
                 }
+
+                // Guardar estado de colapsos
+                this.guardarEstadoColapsos();
             }
 
             abrirModalServicio(servicioId = null) {
@@ -1996,42 +2104,62 @@
                 this.guardarDatos();
                 this.guardarEstado();
                 this.renderFacturas();
-                this.renderServicios();
                 this.cerrarModal('modal-factura');
+
+                // Actualizar solo el servicio afectado
+                if (this.servicioActualFactura) {
+                    this.actualizarServicioIndividual(this.servicioActualFactura);
+                }
+
+                this.mostrarToast(esNueva ? 'Factura agregada' : 'Factura actualizada', 'success');
             }
 
             marcarPagada(facturaId) {
-                const servicio = this.servicios.find(s => s.facturas.some(f => f.id === facturaId));
-                if (!servicio) return;
+                const hoy = this.obtenerFechaLocal();
+                let servicioId = null;
 
-                const factura = servicio.facturas.find(f => f.id === facturaId);
-                if (factura) {
-                    factura.pagada = true;
-                    factura.fechaPago = this.obtenerFechaLocal();
+                this.servicios.forEach(servicio => {
+                    const factura = servicio.facturas.find(f => f.id === facturaId);
+                    if (factura) {
+                        factura.pagada = true;
+                        factura.fechaPago = hoy;
+                        servicioId = servicio.id;
+                    }
+                });
 
-                    this.guardarDatos();
-                    this.guardarEstado();
-                    this.renderServicios(); // Cambiado de renderFacturas()
-                    this.mostrarToast('Factura marcada como pagada', 'success');
+                this.guardarDatos();
+                this.guardarEstado();
+
+                if (servicioId) {
+                    this.actualizarServicioIndividual(servicioId);
                 }
+
+                this.actualizarResumenMes();
+                this.mostrarToast('Factura marcada como pagada', 'success');
             }
 
             marcarNoPagada(facturaId) {
-                const servicio = this.servicios.find(s => s.facturas.some(f => f.id === facturaId));
-                if (!servicio) return;
+                let servicioId = null;
 
-                const factura = servicio.facturas.find(f => f.id === facturaId);
-                if (factura) {
-                    factura.pagada = false;
-                    factura.fechaPago = null;
+                this.servicios.forEach(servicio => {
+                    const factura = servicio.facturas.find(f => f.id === facturaId);
+                    if (factura) {
+                        factura.pagada = false;
+                        factura.fechaPago = null;
+                        servicioId = servicio.id;
+                    }
+                });
 
-                    this.guardarDatos();
-                    this.guardarEstado();
-                    this.renderServicios(); // Cambiado de renderFacturas()
-                    this.mostrarToast('Factura marcada como no pagada', 'success');
+                this.guardarDatos();
+                this.guardarEstado();
+
+                if (servicioId) {
+                    this.actualizarServicioIndividual(servicioId);
                 }
-            }
 
+                this.actualizarResumenMes();
+                this.mostrarToast('Factura marcada como no pagada', 'success');
+            }
             editarFactura(facturaId) {
                 // Buscar el servicio que contiene esta factura
                 const servicio = this.servicios.find(s => s.facturas.some(f => f.id === facturaId));
@@ -2285,6 +2413,41 @@
             }
 
             // ========================================
+            // ESTADO DE COLAPSOS
+            // ========================================
+
+            guardarEstadoColapsos() {
+                const colapsosAbiertos = [];
+                document.querySelectorAll('.facturas-colapso.active').forEach(colapso => {
+                    const servicioId = colapso.id.replace('facturas-', '');
+                    colapsosAbiertos.push(servicioId);
+                });
+                localStorage.setItem('colapsos_abiertos', JSON.stringify(colapsosAbiertos));
+            }
+
+            cargarEstadoColapsos() {
+                try {
+                    const guardado = localStorage.getItem('colapsos_abiertos');
+                    return guardado ? JSON.parse(guardado) : [];
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            restaurarColapsos() {
+                const colapsosAbiertos = this.cargarEstadoColapsos();
+                colapsosAbiertos.forEach(servicioId => {
+                    const colapso = document.getElementById(`facturas-${servicioId}`);
+                    const servicioItem = document.querySelector(`.servicio-item[data-id="${servicioId}"]`);
+
+                    if (colapso && servicioItem) {
+                        colapso.classList.add('active');
+                        servicioItem.classList.add('expanded');
+                    }
+                });
+            }
+
+            // ========================================
             // TEMA
             // ========================================
 
@@ -2395,32 +2558,13 @@
         // Inicializar aplicación
         const app = new GestionServicios();
     </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('SW registrado:', registration.scope);
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // Lógica visual para avisar al usuario
-                                    if (window.UILogic) UILogic.mostrarToast('Nueva versión disponible. Recarga la página.', 'info');
-                                }
-                            });
-                        });
-                    })
-                    .catch(err => console.error('❌ Error SW:', err));
-            });
-        }
-    </script>
+
 </body>
 
 </html>
 
 <!--// ====================================================================
-    //                 NOTAS SISTEMA DeltaF VERSION 0.14
+    //                 NOTAS SISTEMA DeltaF VERSION 0.15
     // ====================================================================
     
      - PROMP:

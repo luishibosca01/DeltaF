@@ -279,11 +279,15 @@
             border: none;
         }
 
-        /* --- Servicios --- */
         .servicios-lista {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
+            max-height: 5000px;
+            opacity: 1;
+            overflow: hidden;
+            margin-top: 1rem;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out, padding 0.3s ease-out;
         }
 
         .servicio-item {
@@ -376,16 +380,21 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
             z-index: 100;
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            animation: fadeIn 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .modal.active {
             display: flex;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .modal-content {
@@ -549,6 +558,18 @@
             }
         }
 
+        @keyframes slideDownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* --- Scrollbar --- */
         .custom-scroll {
             overflow-y: auto;
@@ -632,22 +653,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 100;
+
         }
 
         .menu-overlay.active {
             display: block;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-            }
-
-            to {
-                transform: translateX(0);
-            }
         }
 
         .menu-item {
@@ -953,7 +967,11 @@
         /* Cuando está completamente colapsado */
         #servicios-content.collapsed .servicios-actions,
         #servicios-content.collapsed .servicios-lista {
-            display: none;
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
         /* --- codigo css --- */
@@ -1029,7 +1047,7 @@
             <line x1="3" y1="12" x2="3.01" y2="12" class="icon-line" stroke="currentColor"></line>
             <line x1="3" y1="18" x2="3.01" y2="18" class="icon-line" stroke="currentColor"></line>
         </symbol>
-        <symbol id="icon-cancelar" viewBox="0 0 24 24">
+        <symbol id="icon-cancel" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" class="icon-line" stroke="currentColor"></line>
             <line x1="6" y1="6" x2="18" y2="18" class="icon-line" stroke="currentColor"></line>
         </symbol>
@@ -1091,9 +1109,8 @@
         </h1>
         <div class="header-actions">
             <button class="icon-btn" id="btn-ajustes" aria-label="Ajustes">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                        d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
+                <svg class="icon">
+                    <use href="#icon-settings" />
                 </svg>
             </button>
         </div>
@@ -1139,13 +1156,12 @@
 
         <div class="menu-footer">
             <button class="btn-cerrar-menu" id="btn-cerrar-menu">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <line class="icon-line" x1="18" y1="6" x2="6" y2="18" />
-                    <line class="icon-line" x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+                <svg class="icon">
+                        <use href="#icon-cancel" />
+                    </svg>
                 Cerrar menú
             </button>
-            <div class="menu-version">Version 0.21</div> <!-- DeltaF -->
+            <div class="menu-version">Version 0.22</div> <!-- DeltaF -->
         </div>
     </div>
 
@@ -1249,8 +1265,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit">Guardar</button>
-                    <button type="button" id="btn-eliminar-servicio"
-                        style="display: none;">Eliminar</button>
+                    <button type="button" id="btn-eliminar-servicio" style="display: none;">Eliminar</button>
                 </div>
             </form>
         </div>
@@ -1305,9 +1320,8 @@
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" >Guardar</button>
-                    <button type="button" id="btn-eliminar-factura-modal"
-                        style="display: none;">Eliminar</button>
+                    <button type="submit">Guardar</button>
+                    <button type="button" id="btn-eliminar-factura-modal" style="display: none;">Eliminar</button>
                 </div>
                 <div class="form-actions" style="margin-top: 0.5rem;">
                     <button type="button" class="btn-secondary" id="modal-factura-close" style="width: 100%;">
@@ -1372,6 +1386,10 @@
                 this.datosResumen = { pendiente: 0, pagadoMes: 0 };
 
                 this.serviciosCollapseState = 'expanded'; // 'expanded', 'semi-collapsed', 'collapsed'
+
+                // Timer para doble click en toggle de servicios
+                this.toggleServiciosTimer = null;
+                this.toggleServiciosDelay = 500; // 
 
                 this.init();
             }
@@ -1691,16 +1709,47 @@
             }
 
             toggleServicios() {
-                const estados = ['collapsed', 'semi-collapsed', 'expanded'];
-                const estadoActualIndex = estados.indexOf(this.serviciosCollapseState);
-                const nuevoEstadoIndex = (estadoActualIndex + 1) % 3;
-                const nuevoEstado = estados[nuevoEstadoIndex];
+                // Si estamos en expanded y hay timer activo (clic rápido después de abrir botones)
+                if (this.serviciosCollapseState === 'expanded' && this.toggleServiciosTimer !== null) {
+                    // Cerrar todo de golpe
+                    clearTimeout(this.toggleServiciosTimer);
+                    this.toggleServiciosTimer = null;
+                    this.serviciosCollapseState = 'collapsed';
+                    this.aplicarEstadoServicios('collapsed');
+                    localStorage.setItem('servicios-collapse-state', 'collapsed');
+                    return;
+                }
 
-                this.serviciosCollapseState = nuevoEstado;
-                this.aplicarEstadoServicios(nuevoEstado);
+                // Limpiar timer si existe
+                if (this.toggleServiciosTimer !== null) {
+                    clearTimeout(this.toggleServiciosTimer);
+                    this.toggleServiciosTimer = null;
+                }
 
-                // Guardar estado en localStorage
-                localStorage.setItem('servicios-collapse-state', nuevoEstado);
+                // Ciclo normal de estados
+                if (this.serviciosCollapseState === 'collapsed') {
+                    // De collapsed a semi-collapsed
+                    this.serviciosCollapseState = 'semi-collapsed';
+                    this.aplicarEstadoServicios('semi-collapsed');
+                    localStorage.setItem('servicios-collapse-state', 'semi-collapsed');
+
+                } else if (this.serviciosCollapseState === 'semi-collapsed') {
+                    // De semi-collapsed a expanded (AQUÍ INICIA EL TIMER)
+                    this.serviciosCollapseState = 'expanded';
+                    this.aplicarEstadoServicios('expanded');
+                    localStorage.setItem('servicios-collapse-state', 'expanded');
+
+                    // Activar timer de 3 segundos
+                    this.toggleServiciosTimer = setTimeout(() => {
+                        this.toggleServiciosTimer = null;
+                    }, this.toggleServiciosDelay);
+
+                } else {
+                    // De expanded a semi-collapsed (después de que expiró el timer)
+                    this.serviciosCollapseState = 'semi-collapsed';
+                    this.aplicarEstadoServicios('semi-collapsed');
+                    localStorage.setItem('servicios-collapse-state', 'semi-collapsed');
+                }
             }
 
             aplicarEstadoServicios(estado) {
@@ -2020,7 +2069,7 @@
                                         </button>
                                     ` : `
                                         <button class="icon-btn" onclick="app.marcarNoPagada('${factura.id}')">
-                                            <svg class="icon"><use href="#icon-cancelar" /></svg>
+                                            <svg class="icon"><use href="#icon-cancel" /></svg>
                                         </button>
                                     `}
                                 </div>
@@ -2661,13 +2710,11 @@
 </html>
 
 <!--// ====================================================================
-    //                 NOTAS SISTEMA DeltaF VERSION 0.21
+    //                 NOTAS SISTEMA DeltaF VERSION 0.22
     // ====================================================================
     
      - PROMP:
-     1) optimizacion de codigo
-     2) validacion de servicios duplicados
-     3) agregado monto maximo
+     1) Se agrega timer para contraer toda la tarjeta de servicios
 
 
      - bugs:

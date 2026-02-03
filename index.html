@@ -275,7 +275,8 @@
 
         #btn-filter,
         #btn-undo,
-        #btn-redo {
+        #btn-redo,
+        #btn-sort {
             border: none;
         }
 
@@ -400,7 +401,7 @@
         .modal-content {
             background: var(--bg-card);
             border-radius: var(--radius);
-            padding: 1.5rem;
+            padding: 1rem;
             max-width: 500px;
             width: 100%;
             max-height: 90vh;
@@ -814,8 +815,71 @@
             color: var(--text-muted);
         }
 
+        /* Estilos base de resumen-monto SIN borde */
         .resumen-monto {
-            cursor: pointer
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .resumen-monto:active {
+            transform: scale(0.98);
+        }
+
+        /* Barra de progreso en resumen */
+        .resumen-progreso {
+            width: 100%;
+            height: 5px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0 1rem 0;
+        }
+
+        .resumen-progreso-barra {
+            height: 100%;
+            background: var(--bg-card);
+            border-radius: 10px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        /* Colores de la barra según el estado de las PENDIENTES */
+        .card.borde-vencido .resumen-progreso-barra,
+        .card.borde-urgente .resumen-progreso-barra {
+            background: var(--c-red);
+        }
+
+        .card.borde-proximo .resumen-progreso-barra {
+            background: var(--c-gold);
+        }
+
+        .card.borde-lejano .resumen-progreso-barra {
+            background: var(--c-blue);
+        }
+
+        .card.borde-pagado .resumen-progreso-barra {
+            background: var(--c-green);
+        }
+
+        /* Bordes dinámicos para la CARD padre (no para resumen-monto) */
+        .card.borde-vencido {
+            border-left: 4px solid var(--c-red);
+        }
+
+        .card.borde-urgente {
+            border-left: 4px solid var(--c-red);
+        }
+
+        .card.borde-proximo {
+            border-left: 4px solid var(--c-gold);
+        }
+
+        .card.borde-lejano {
+            border-left: 4px solid var(--c-blue);
+        }
+
+        .card.borde-pagado {
+            border-left: 4px solid var(--c-green);
         }
 
         .resumen-titulo {
@@ -1196,25 +1260,24 @@
     <!-- Menú de Ajustes -->
     <div class="menu-ajustes" id="menu-ajustes">
         <div class="menu-header">Ajustes</div>
-
         <div class="menu-content">
             <div class="menu-item" id="menu-tema">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path class="icon-line" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                <svg class="icon">
+                    <use href="#icon-moon" />
                 </svg>
                 <span>Tema</span>
             </div>
 
             <div class="menu-item" id="menu-exportar">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path class="icon-line" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v12" />
+                <svg class="icon">
+                    <use href="#icon-download" />
                 </svg>
                 <span>Descargar</span>
             </div>
 
             <div class="menu-item" id="menu-importar">
-                <svg class="icon" viewBox="0 0 24 24">
-                    <path class="icon-line" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                <svg class="icon">
+                    <use href="#icon-upload" />
                 </svg>
                 <span>Restaurar</span>
             </div>
@@ -1235,7 +1298,7 @@
                 </svg>
                 Cerrar menú
             </button>
-            <div class="menu-version">Version 0.23</div> <!-- DeltaF -->
+            <div class="menu-version">Version 0.27</div> <!-- DeltaF -->
         </div>
     </div>
 
@@ -1295,6 +1358,11 @@
                                     <use href="#icon-filter" />
                                 </svg>
                             </button>
+                            <button class="icon-btn" id="btn-sort" title="Ordenar servicios">
+                                <svg class="icon">
+                                    <use href="#icon-list" />
+                                </svg>
+                            </button>
                             <div style="margin-left: auto; display: flex; gap: 0.5rem;">
                                 <button class="icon-btn" id="btn-undo" title="Deshacer (Ctrl+Z)" disabled>
                                     <svg class="icon">
@@ -1326,11 +1394,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-servicio-titulo">Nuevo Servicio</h3>
-                <button class="modal-close" id="modal-servicio-close">
-                    <svg class="icon" viewBox="0 0 24 24">
-                        <path class="icon-line" d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                </button>
+
             </div>
             <form id="form-servicio">
                 <div class="form-group">
@@ -1338,10 +1402,47 @@
                     <input type="text" id="servicio-nombre" required placeholder="Ej: Internet, Luz, Agua">
                 </div>
                 <div class="form-actions">
-                    <button type="submit">Guardar</button>
+                    <button type="submit">
+                        <svg class="icon">
+                            <use href="#icon-save" />
+                        </svg>Guardar
+                    </button>
                     <button type="button" id="btn-eliminar-servicio" style="display: none;">Eliminar</button>
+                    <button class="button" id="modal-servicio-close">
+                        <svg class="icon">
+                            <use href="#icon-cancel" />
+                        </svg> Cerrar
+                    </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Ordenar -->
+    <div id="modal-ordenar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ordenar servicios</h3>
+                <button class="modal-close" onclick="app.cerrarModal('modal-ordenar')">
+                    <svg class="icon icon-line" viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Ordenar por</label>
+                <select id="select-orden">
+                    <option value="nombre">Nombre (A-Z)</option>
+                    <option value="vencimiento">Vencimiento (Más próximo primero)</option>
+                    <option value="monto-desc">Monto (Mayor a menor)</option>
+                    <option value="monto-asc">Monto (Menor a mayor)</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button onclick="app.aplicarOrden()">Aplicar</button>
+                <button onclick="app.cerrarModal('modal-ordenar')">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -1370,11 +1471,8 @@
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="date" id="factura-fecha" required style="flex: 1;">
                         <button type="button" class="icon-btn" id="btn-fecha-hoy" title="Fecha de hoy">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <rect class="icon-line" x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                <line class="icon-line" x1="16" y1="2" x2="16" y2="6" />
-                                <line class="icon-line" x1="8" y1="2" x2="8" y2="6" />
-                                <line class="icon-line" x1="3" y1="10" x2="21" y2="10" />
+                            <svg class="icon">
+                                <use href="#icon-calendar-simple" />
                             </svg>
                         </button>
                     </div>
@@ -1384,21 +1482,25 @@
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="date" id="factura-fecha-pago" style="flex: 1;">
                         <button type="button" class="icon-btn" id="btn-fecha-pago-hoy" title="Fecha de hoy">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <rect class="icon-line" x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                <line class="icon-line" x1="16" y1="2" x2="16" y2="6" />
-                                <line class="icon-line" x1="8" y1="2" x2="8" y2="6" />
-                                <line class="icon-line" x1="3" y1="10" x2="21" y2="10" />
+                            <svg class="icon">
+                                <use href="#icon-calendar-simple" />
                             </svg>
                         </button>
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit">Guardar</button>
-                    <button type="button" id="btn-eliminar-factura-modal" style="display: none;">Eliminar</button>
+                    <button type="submit"><svg class="icon">
+                            <use href="#icon-save" />
+                        </svg> Guardar</button>
+                    <button type="button" id="btn-eliminar-factura-modal" style="display: none;"><svg class="icon">
+                            <use href="#icon-broom" />
+                        </svg> Eliminar</button>
                 </div>
                 <div class="form-actions" style="margin-top: 0.5rem;">
-                    <button type="button" class="btn-secondary" id="modal-factura-close" style="width: 100%;">
+                    <button type="button" class="btn-secondary" id="modal-factura-close" style="width: 100%;"><svg
+                            class="icon">
+                            <use href="#icon-undo" />
+                        </svg>
                         Volver
                     </button>
                 </div>
@@ -1441,12 +1543,11 @@
 
         class GestionServicios {
             constructor() {
-                // Estado de la aplicación
                 this.servicios = [];
                 this.servicioActual = null;
                 this.facturaActual = null;
 
-                // Sistema de Undo/Redo
+                // Historial undo/redo
                 this.historial = [];
                 this.historialIndex = -1;
                 this.maxHistorial = 50;
@@ -1456,13 +1557,17 @@
                 this.THEME_KEY = 'gestion_servicios_theme';
 
                 this.mostrandoPagadoMes = localStorage.getItem('resumen-mostrar-pagado') === 'true';
-                this.datosResumen = { pendiente: 0, pagadoMes: 0 };
+                this.datosResumen = { pendiente: 0, pagadoMes: 0, totalPeriodo: 0 };
 
                 this.serviciosCollapseState = 'expanded'; // 'expanded', 'semi-collapsed', 'collapsed'
 
                 // Timer para doble click en toggle de servicios
                 this.toggleServiciosTimer = null;
-                this.toggleServiciosDelay = 500; // 
+                this.toggleServiciosDelay = 500;
+
+                // NUEVAS PROPIEDADES
+                this.filtroActual = 'todos'; // 'todos', 'pendientes', 'pagados', 'vencidos'
+                this.ordenActual = localStorage.getItem('gestion_servicios_orden') || 'nombre';
 
                 this.init();
             }
@@ -1493,6 +1598,15 @@
                 const serviciosState = localStorage.getItem('servicios-collapse-state') || 'expanded';
                 this.serviciosCollapseState = serviciosState;
                 this.aplicarEstadoServicios(serviciosState);
+                // Botón ordenar
+                document.getElementById('btn-sort').addEventListener('click', () => {
+                    // Sincronizar el select con el orden actual antes de abrir el modal
+                    const select = document.getElementById('select-orden');
+                    if (select) {
+                        select.value = this.ordenActual;
+                    }
+                    this.abrirModal('modal-ordenar');
+                });
             }
 
             setupEventListeners() {
@@ -1575,13 +1689,19 @@
             // ========================================
 
             actualizarResumenMes() {
-                const mesActual = new Date().getMonth();
-                const añoActual = new Date().getFullYear();
-                const mesSiguiente = mesActual === 11 ? 0 : mesActual + 1;
-                const añoSiguiente = mesActual === 11 ? añoActual + 1 : añoActual;
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const mesActual = hoy.getMonth();
+                const añoActual = hoy.getFullYear();
+
+                // Calcular mes siguiente
+                const fechaMesSiguiente = new Date(añoActual, mesActual + 1, 1);
+                const mesSiguiente = fechaMesSiguiente.getMonth();
+                const añoSiguiente = fechaMesSiguiente.getFullYear();
 
                 let totalAPagar = 0;
                 let totalPagadoMes = 0;
+                let totalFacturasMesActualYSiguiente = 0; // NUEVO: total de facturas del período
 
                 this.servicios.forEach(servicio => {
                     servicio.facturas.forEach(factura => {
@@ -1592,7 +1712,10 @@
                         const esDelMesActual = mesFactura === mesActual && añoFactura === añoActual;
                         const esDelMesSiguiente = mesFactura === mesSiguiente && añoFactura === añoSiguiente;
 
+                        // Calcular total del período (mes actual + siguiente)
                         if (esDelMesActual || esDelMesSiguiente) {
+                            totalFacturasMesActualYSiguiente += factura.monto;
+
                             if (!factura.pagada) {
                                 totalAPagar += factura.monto;
                             }
@@ -1611,8 +1734,13 @@
                 // Guardar datos para el toggle
                 this.datosResumen = {
                     pendiente: totalAPagar,
-                    pagadoMes: totalPagadoMes
+                    pagadoMes: totalPagadoMes,
+                    totalPeriodo: totalFacturasMesActualYSiguiente // NUEVO
                 };
+
+                // CARGAR el estado guardado ANTES de mostrar
+                const estadoGuardado = localStorage.getItem('resumen-mostrar-pagado');
+                this.mostrandoPagadoMes = estadoGuardado === 'true';
 
                 // Mostrar según estado actual
                 if (this.mostrandoPagadoMes) {
@@ -1625,22 +1753,112 @@
                 this.actualizarEstadisticas();
             }
 
+            obtenerColorBordeMasPrioritario() {
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const mesActual = hoy.getMonth();
+                const añoActual = hoy.getFullYear();
+                const mesSiguiente = new Date(añoActual, mesActual + 1, 1).getMonth();
+                const añoSiguiente = mesSiguiente === 0 ? añoActual + 1 : añoActual;
+
+                let prioridad = 5; // 1=vencido/urgente, 2=proximo, 3=lejano, 4=pagado, 5=sin estado
+                let colorBorde = '';
+
+                this.servicios.forEach(servicio => {
+                    servicio.facturas.forEach(factura => {
+                        const fechaFactura = new Date(factura.fecha + 'T00:00:00');
+                        const mesFactura = fechaFactura.getMonth();
+                        const añoFactura = fechaFactura.getFullYear();
+
+                        // Verificar si es del mes actual o siguiente
+                        const esDelMesActual = mesFactura === mesActual && añoFactura === añoActual;
+                        const esDelMesSiguiente = mesFactura === mesSiguiente && añoFactura === añoSiguiente;
+
+                        if (!esDelMesActual && !esDelMesSiguiente) return;
+
+                        // AHORA AMBAS VISTAS evalúan solo las facturas PENDIENTES para determinar el color
+                        if (!factura.pagada) {
+                            const vencimiento = new Date(factura.fecha + 'T00:00:00');
+                            vencimiento.setHours(0, 0, 0, 0);
+                            const diasRestantes = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+
+                            if (diasRestantes < 0) {
+                                // Vencido - máxima prioridad
+                                if (prioridad > 1) {
+                                    prioridad = 1;
+                                    colorBorde = 'borde-vencido';
+                                }
+                            } else if (diasRestantes <= 2) {
+                                // Urgente (hoy, mañana, pasado)
+                                if (prioridad > 1) {
+                                    prioridad = 1;
+                                    colorBorde = 'borde-urgente';
+                                }
+                            } else if (diasRestantes <= 7) {
+                                // Próximo (3-7 días)
+                                if (prioridad > 2) {
+                                    prioridad = 2;
+                                    colorBorde = 'borde-proximo';
+                                }
+                            } else {
+                                // Lejano (más de 7 días)
+                                if (prioridad > 3) {
+                                    prioridad = 3;
+                                    colorBorde = 'borde-lejano';
+                                }
+                            }
+                        }
+                    });
+                });
+
+                // Si no hay pendientes, usar verde
+                if (!colorBorde) {
+                    colorBorde = 'borde-pagado';
+                }
+
+                return colorBorde;
+            }
+
             mostrarPendienteEnResumen() {
+                // Establecer el estado ANTES de obtener el color
+                this.mostrandoPagadoMes = false;
+
                 const fechaHoy = new Date();
                 const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
                 const fechaFormateada = fechaHoy.toLocaleDateString('es-AR', opciones);
 
+                const colorBorde = this.obtenerColorBordeMasPrioritario();
+
+                // Calcular porcentaje de pago
+                const totalPagado = this.datosResumen.totalPeriodo - this.datosResumen.pendiente;
+                const porcentajePagado = this.datosResumen.totalPeriodo > 0
+                    ? (totalPagado / this.datosResumen.totalPeriodo) * 100
+                    : 0;
+
                 const resumenHTML = `
         <div class="resumen-monto" id="resumen-toggle" style="animation: slideDownFade 0.3s ease-out;">
-            <div class="resumen-titulo">Resumen de pagos</div>
+            <div class="resumen-titulo">Resumen de deuda</div>
             <div class="resumen-valor">${this.formatearMoneda(this.datosResumen.pendiente)}</div>
             <div class="resumen-label">Pendiente de pago</div>
-        <div class="resumen-fecha">${fechaFormateada}</div>
+            <div class="resumen-progreso">
+                <div class="resumen-progreso-barra" style="width: ${porcentajePagado}%"></div>
             </div>
+            <div class="resumen-fecha">${fechaFormateada}</div>
+        </div>
     `;
                 document.getElementById('resumen-mes').innerHTML = resumenHTML;
-                this.mostrandoPagadoMes = false;
                 localStorage.setItem('resumen-mostrar-pagado', 'false');
+
+                // Aplicar clase de borde a la CARD padre
+                const cardResumen = document.getElementById('resumen-mes').closest('.card');
+                if (cardResumen) {
+                    // Remover todas las clases de borde previas
+                    cardResumen.classList.remove('borde-vencido', 'borde-urgente', 'borde-proximo', 'borde-lejano', 'borde-pagado');
+                    // Agregar la clase correspondiente
+                    if (colorBorde) {
+                        cardResumen.classList.add(colorBorde);
+                    }
+                }
 
                 // Agregar event listener
                 document.getElementById('resumen-toggle').addEventListener('click', () => {
@@ -1649,21 +1867,44 @@
             }
 
             mostrarPagadoEnResumen() {
+                // Establecer el estado ANTES de obtener el color
+                this.mostrandoPagadoMes = true;
+
                 const fechaHoy = new Date();
                 const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
                 const fechaFormateada = fechaHoy.toLocaleDateString('es-AR', opciones);
+
+                const colorBorde = this.obtenerColorBordeMasPrioritario();
+
+                // Calcular porcentaje de pago (en esta vista mostramos lo pagado del total)
+                const porcentajePagado = this.datosResumen.totalPeriodo > 0
+                    ? (this.datosResumen.pagadoMes / this.datosResumen.totalPeriodo) * 100
+                    : 0;
 
                 const resumenHTML = `
         <div class="resumen-monto" id="resumen-toggle" style="animation: slideDownFade 0.3s ease-out;">
             <div class="resumen-titulo">Resumen de pagos</div>
             <div class="resumen-valor">${this.formatearMoneda(this.datosResumen.pagadoMes)}</div>
             <div class="resumen-label">Pagados Este Mes</div>
+            <div class="resumen-progreso">
+                <div class="resumen-progreso-barra" style="width: ${porcentajePagado}%"></div>
+            </div>
             <div class="resumen-fecha">${fechaFormateada}</div>
         </div>
     `;
                 document.getElementById('resumen-mes').innerHTML = resumenHTML;
-                this.mostrandoPagadoMes = true;
                 localStorage.setItem('resumen-mostrar-pagado', 'true');
+
+                // Aplicar clase de borde a la CARD padre
+                const cardResumen = document.getElementById('resumen-mes').closest('.card');
+                if (cardResumen) {
+                    // Remover todas las clases de borde previas
+                    cardResumen.classList.remove('borde-vencido', 'borde-urgente', 'borde-proximo', 'borde-lejano', 'borde-pagado');
+                    // Agregar la clase correspondiente
+                    if (colorBorde) {
+                        cardResumen.classList.add(colorBorde);
+                    }
+                }
 
                 // Agregar event listener
                 document.getElementById('resumen-toggle').addEventListener('click', () => {
@@ -1738,7 +1979,7 @@
     </div>
     <div class="estadisticas-lista">
         <div class="estadistica-item">
-            <span class="estadistica-label">Total Pagado</span>
+            <span class="estadistica-label">Monto</span>
             <span class="estadistica-valor">${this.formatearMoneda(totalMes)}</span>
         </div>
         <div class="estadistica-item">
@@ -1888,10 +2129,10 @@
             // ========================================
 
             renderServicios() {
-                // Guardar posición de scroll antes de actualizar
-                const scrollPos = window.scrollY || window.pageYOffset;
-
                 const lista = document.getElementById('servicios-lista');
+                if (!lista) return;
+
+                const scrollPos = window.scrollY;
 
                 if (this.servicios.length === 0) {
                     lista.innerHTML = `
@@ -1907,10 +2148,11 @@
                     return;
                 }
 
-                // Ordenar servicios alfabéticamente por nombre (A-Z)
-                const serviciosOrdenados = [...this.servicios].sort((a, b) => {
-                    return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
-                });
+                // Filtrar servicios
+                let serviciosFiltrados = this.aplicarFiltro(this.servicios);
+
+                // Ordenar servicios según el orden actual
+                const serviciosOrdenados = this.ordenarServicios(serviciosFiltrados);
 
                 lista.innerHTML = serviciosOrdenados.map(servicio => {
                     const ultimaFactura = this.obtenerUltimaFactura(servicio.id);
@@ -2014,6 +2256,72 @@
                 });
 
                 this.actualizarResumenMes();
+            }
+
+            aplicarFiltro(servicios) {
+                // Por ahora devuelve todos los servicios sin filtrar
+                // Puedes implementar filtros después
+                return servicios;
+            }
+
+            ordenarServicios(servicios) {
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+
+                return [...servicios].sort((a, b) => {
+                    switch (this.ordenActual) {
+                        case 'nombre':
+                            // Alfabético A-Z
+                            return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+
+                        case 'vencimiento':
+                            // Por fecha de vencimiento más próxima
+                            const facturaA = this.obtenerUltimaFactura(a.id);
+                            const facturaB = this.obtenerUltimaFactura(b.id);
+
+                            // Si no tienen facturas, van al final
+                            if (!facturaA && !facturaB) return 0;
+                            if (!facturaA) return 1;
+                            if (!facturaB) return -1;
+
+                            // Las pagadas van al final
+                            if (facturaA.pagada && !facturaB.pagada) return 1;
+                            if (!facturaA.pagada && facturaB.pagada) return -1;
+                            if (facturaA.pagada && facturaB.pagada) {
+                                // Ambas pagadas, ordenar por nombre
+                                return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+                            }
+
+                            // Ambas pendientes, ordenar por vencimiento
+                            const fechaA = new Date(facturaA.fecha + 'T00:00:00');
+                            const fechaB = new Date(facturaB.fecha + 'T00:00:00');
+                            return fechaA - fechaB;
+
+                        case 'monto-desc':
+                            // Por monto de mayor a menor
+                            const montoA = this.obtenerUltimaFactura(a.id)?.monto || 0;
+                            const montoB = this.obtenerUltimaFactura(b.id)?.monto || 0;
+                            return montoB - montoA;
+
+                        case 'monto-asc':
+                            // Por monto de menor a mayor
+                            const montoAsc_A = this.obtenerUltimaFactura(a.id)?.monto || 0;
+                            const montoAsc_B = this.obtenerUltimaFactura(b.id)?.monto || 0;
+                            return montoAsc_A - montoAsc_B;
+
+                        default:
+                            return 0;
+                    }
+                });
+            }
+
+            aplicarOrden() {
+                const select = document.getElementById('select-orden');
+                this.ordenActual = select.value;
+                localStorage.setItem('gestion_servicios_orden', this.ordenActual);
+                this.renderServicios();
+                this.cerrarModal('modal-ordenar');
+                this.mostrarToast('Orden aplicado', 'success');
             }
 
             actualizarServicioIndividual(servicioId) {
@@ -2346,11 +2654,8 @@
                 this.guardarEstado();
                 this.cerrarModal('modal-factura');
 
-                // Actualizar solo el servicio afectado
-                this.actualizarServicioIndividual(this.servicioActual);
-
-                // Actualizar resumen de pagos
-                this.actualizarResumenMes();
+                // Re-renderizar todos los servicios para aplicar el ordenamiento
+                this.renderServicios();
 
                 // Actualizar el modal de facturas si está abierto
                 const modalFacturas = document.getElementById('modal-facturas-servicio');
@@ -2376,6 +2681,7 @@
 
                 this.guardarDatos();
                 this.guardarEstado();
+                this.renderServicios();
 
                 if (servicioId) {
                     this.actualizarServicioIndividual(servicioId);
@@ -2405,6 +2711,7 @@
 
                 this.guardarDatos();
                 this.guardarEstado();
+                this.renderServicios();
 
                 if (servicioId) {
                     this.actualizarServicioIndividual(servicioId);
@@ -2790,11 +3097,11 @@
 </html>
 
 <!--// ====================================================================
-    //                 NOTAS SISTEMA DeltaF VERSION 0.23
+    //                 NOTAS SISTEMA DeltaF VERSION 0.27
     // ====================================================================
     
      - PROMP:
-     1) optimizacion de codigo
+     1) Se agrega funcion ordenar
 
 
      - bugs:

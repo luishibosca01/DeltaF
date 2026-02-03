@@ -155,7 +155,6 @@
             background: transparent;
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 0.5rem;
             width: 50px;
             height: 50px;
             display: flex;
@@ -821,6 +820,61 @@
             background: var(--c-red);
         }
 
+        /* --- Menú Emergente Agregar --- */
+        .menu-agregar {
+            position: fixed;
+            bottom: 100px;
+            right: 1.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 90;
+            min-width: 200px;
+            animation: slideUp 0.2s ease;
+        }
+
+        .menu-agregar.active {
+            display: flex;
+        }
+
+        .menu-agregar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .menu-agregar-item:hover {
+            color: var(--text-muted);
+        }
+
+        .menu-agregar-item:active {
+            transform: scale(0.98);
+        }
+
+        .menu-agregar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 85;
+        }
+
+        .menu-agregar-overlay.active {
+            display: block;
+        }
+
         .resumen-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -1230,6 +1284,8 @@
         })();
     </script>
     <script src="sw-register.js"></script>
+
+    <!-- ICONOS SVG -->
     <svg style="display: none;">
         <symbol id="icon-moon" viewBox="0 0 24 24">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" class="icon-line" stroke-width="2"
@@ -1248,11 +1304,16 @@
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </g>
         </symbol>
-        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
-            </path>
+        <symbol id="icon-menu" viewBox="0 0 24 24">
+            <line x1="4" y1="6" x2="20" y2="6" class="icon-line" stroke="currentColor" stroke-width="2"></line>
+            <line x1="4" y1="12" x2="20" y2="12" class="icon-line" stroke="currentColor" stroke-width="2"></line>
+            <line x1="4" y1="18" x2="20" y2="18" class="icon-line" stroke="currentColor" stroke-width="2"></line>
+        </symbol>
+        <symbol id="icon-sort" viewBox="0 0 24 24">
+            <line x1="4" y1="6" x2="11" y2="6" class="icon-line" stroke="currentColor" stroke-width="2"></line>
+            <line x1="4" y1="12" x2="16" y2="12" class="icon-line" stroke="currentColor" stroke-width="2"></line>
+            <line x1="4" y1="18" x2="20" y2="18" class="icon-line" stroke="currentColor" stroke-width="2"></line>
+            <polygon points="15 4 20 9 15 14" class="icon-line" stroke="currentColor" stroke-width="2"></polygon>
         </symbol>
         <symbol id="icon-clock" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" class="icon-line" stroke="currentColor"></circle>
@@ -1289,14 +1350,6 @@
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" class="icon-line" stroke="currentColor">
             </path>
         </symbol>
-        <symbol id="icon-list" viewBox="0 0 24 24">
-            <line x1="8" y1="6" x2="21" y2="6" class="icon-line" stroke="currentColor"></line>
-            <line x1="8" y1="12" x2="21" y2="12" class="icon-line" stroke="currentColor"></line>
-            <line x1="8" y1="18" x2="21" y2="18" class="icon-line" stroke="currentColor"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6" class="icon-line" stroke="currentColor"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12" class="icon-line" stroke="currentColor"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18" class="icon-line" stroke="currentColor"></line>
-        </symbol>
         <symbol id="icon-cancel" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18" class="icon-line" stroke="currentColor"></line>
             <line x1="6" y1="6" x2="18" y2="18" class="icon-line" stroke="currentColor"></line>
@@ -1309,7 +1362,7 @@
             <path d="M21 7v6h-6" class="icon-line" stroke="currentColor"></path>
             <path d="M3 17a9 9 0 019-9 9 9 0 016 2.3L21 13" class="icon-line" stroke="currentColor"></path>
         </symbol>
-        <symbol id="icon-calendar-simple" viewBox="0 0 24 24">
+        <symbol id="icon-calendar" viewBox="0 0 24 24">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" class="icon-line" stroke="currentColor"></rect>
             <line x1="16" y1="2" x2="16" y2="6" class="icon-line" stroke="currentColor"></line>
             <line x1="8" y1="2" x2="8" y2="6" class="icon-line" stroke="currentColor"></line>
@@ -1345,22 +1398,15 @@
             <rect x="2" y="7" width="20" height="14" rx="2" ry="2" class="icon-line" stroke="currentColor"></rect>
             <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" class="icon-line" stroke="currentColor"></path>
         </symbol>
-
     </svg>
+
     <!-- Header -->
     <header class="header">
-        <h1>
-            <svg class="icon" viewBox="0 0 24 24">
-                <path
-                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
-                <path d="M7 12h2v5H7zm4-3h2v8h-2zm4-3h2v11h-2z" />
-            </svg>
-            Servicios
-        </h1>
+        <h1> Servicios </h1>
         <div class="header-actions">
             <button class="icon-btn" id="btn-ajustes" aria-label="Ajustes">
                 <svg class="icon">
-                    <use href="#icon-settings" />
+                    <use href="#icon-menu" />
                 </svg>
             </button>
         </div>
@@ -1371,7 +1417,9 @@
 
     <!-- Menú de Ajustes -->
     <div class="menu-ajustes" id="menu-ajustes">
-        <div class="menu-header">Ajustes</div>
+        <div class="menu-header"><svg class="icon">
+                <use href="#icon-menu" />
+            </svg> Ajustes</div>
         <div class="menu-content">
             <div class="menu-item" id="menu-tema">
                 <svg class="icon">
@@ -1379,14 +1427,12 @@
                 </svg>
                 <span>Tema</span>
             </div>
-
             <div class="menu-item" id="menu-exportar">
                 <svg class="icon">
                     <use href="#icon-download" />
                 </svg>
                 <span>Descargar</span>
             </div>
-
             <div class="menu-item" id="menu-importar">
                 <svg class="icon">
                     <use href="#icon-upload" />
@@ -1410,7 +1456,7 @@
                 </svg>
                 Cerrar menú
             </button>
-            <div class="menu-version">Version 0.28</div> <!-- DeltaF -->
+            <div class="menu-version">Version 0.30</div> <!-- DeltaF -->
         </div>
     </div>
 
@@ -1449,11 +1495,8 @@
                 <div class="card card-fade-in" style="animation-delay: 0.3s;">
                     <h2 class="card-header-collapsible" id="servicios-header">
                         <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <rect class="icon-line" x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                <line class="icon-line" x1="16" y1="2" x2="16" y2="6" />
-                                <line class="icon-line" x1="8" y1="2" x2="8" y2="6" />
-                                <line class="icon-line" x1="3" y1="10" x2="21" y2="10" />
+                            <svg class="icon">
+                                <use href="#icon-calendar" />
                             </svg>
                             Servicios
                         </span>
@@ -1467,7 +1510,7 @@
                         <div class="card-actions servicios-actions" id="servicios-actions">
                             <button class="icon-btn" id="btn-sort" title="Ordenar servicios">
                                 <svg class="icon">
-                                    <use href="#icon-list" />
+                                    <use href="#icon-sort" />
                                 </svg>
                             </button>
                             <div style="margin-left: auto; display: flex; gap: 0.5rem;">
@@ -1507,8 +1550,31 @@
         </div>
     </div>
 
-    <!-- Botón Agregar Servicio -->
-    <button class="btn-add" id="btn-agregar-servicio" aria-label="Agregar servicio">+</button>
+    <!-- Botón Agregar -->
+    <button class="btn-add" id="btn-agregar-servicio" aria-label="Agregar">+</button>
+
+    <!-- Overlay del menú agregar -->
+    <div class="menu-agregar-overlay" id="menu-agregar-overlay"></div>
+
+    <!-- Menú Emergente Agregar -->
+    <div class="menu-agregar" id="menu-agregar">
+        <div class="menu-agregar-item" id="menu-agregar-servicio">
+            <svg class="icon">
+                            <use href="#icon-calendar" />
+                        </svg>
+            <span>Agregar Servicio</span>
+        </div>
+        <div class="menu-agregar-item" id="menu-agregar-factura">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" class="icon-line"
+                    stroke="currentColor"></path>
+                <polyline points="14 2 14 8 20 8" class="icon-line" stroke="currentColor"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12" class="icon-line" stroke="currentColor"></line>
+                <line x1="9" y1="15" x2="15" y2="15" class="icon-line" stroke="currentColor"></line>
+            </svg>
+            <span>Agregar Factura</span>
+        </div>
+    </div>
 
     <!-- Modal Agregar/Editar Servicio -->
     <div class="modal" id="modal-servicio">
@@ -1546,12 +1612,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Ordenar servicios</h3>
-                <button class="modal-close" onclick="app.cerrarModal('modal-ordenar')">
-                    <svg class="icon icon-line" viewBox="0 0 24 24">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
             </div>
             <div class="form-group">
                 <label>Ordenar por</label>
@@ -1590,12 +1650,18 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="factura-servicio">Servicio</label>
+                    <select id="factura-servicio" required>
+                        <!-- Los servicios se cargarán dinámicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="factura-fecha">Fecha de vencimiento</label>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="date" id="factura-fecha" required style="flex: 1;">
                         <button type="button" class="icon-btn" id="btn-fecha-hoy" title="Fecha de hoy">
                             <svg class="icon">
-                                <use href="#icon-calendar-simple" />
+                                <use href="#icon-calendar" />
                             </svg>
                         </button>
                     </div>
@@ -1606,7 +1672,7 @@
                         <input type="date" id="factura-fecha-pago" style="flex: 1;">
                         <button type="button" class="icon-btn" id="btn-fecha-pago-hoy" title="Fecha de hoy">
                             <svg class="icon">
-                                <use href="#icon-calendar-simple" />
+                                <use href="#icon-calendar" />
                             </svg>
                         </button>
                     </div>
@@ -1774,7 +1840,7 @@
 
             setupEventListeners() {
                 // Botones principales
-                document.getElementById('btn-agregar-servicio').addEventListener('click', () => this.abrirModalServicio());
+                document.getElementById('btn-agregar-servicio').addEventListener('click', () => this.toggleMenuAgregar());
                 document.getElementById('btn-ajustes').addEventListener('click', () => this.toggleMenuAjustes());
                 document.getElementById('menu-overlay').addEventListener('click', () => this.cerrarMenuAjustes());
                 document.getElementById('btn-cerrar-menu').addEventListener('click', () => this.cerrarMenuAjustes());
@@ -1788,6 +1854,17 @@
                 document.getElementById('menu-exportar').addEventListener('click', () => this.exportarDatos());
                 document.getElementById('menu-importar').addEventListener('click', () => this.importarDatos());
                 document.getElementById('menu-limpiar').addEventListener('click', () => this.limpiarDatos());
+
+                // Menú agregar
+                document.getElementById('menu-agregar-overlay').addEventListener('click', () => this.cerrarMenuAgregar());
+                document.getElementById('menu-agregar-servicio').addEventListener('click', () => {
+                    this.cerrarMenuAgregar();
+                    this.abrirModalServicio();
+                });
+                document.getElementById('menu-agregar-factura').addEventListener('click', () => {
+                    this.cerrarMenuAgregar();
+                    this.abrirModalFacturaRapida();
+                });
 
                 // Modales
                 document.getElementById('modal-servicio-close').addEventListener('click', () => this.cerrarModal('modal-servicio'));
@@ -2731,9 +2808,16 @@
                 const form = document.getElementById('form-factura');
                 const btnEliminar = document.getElementById('btn-eliminar-factura-modal');
                 const grupoFechaPago = document.getElementById('grupo-fecha-pago');
+                const selectServicio = document.getElementById('factura-servicio');
 
                 form.reset();
                 grupoFechaPago.style.display = 'none';
+
+                // Llenar el select de servicios
+                selectServicio.innerHTML = this.servicios.map(servicio => {
+                    const selected = servicio.id === servicioId ? 'selected' : '';
+                    return `<option value="${servicio.id}" ${selected}>${this.escaparHTML(servicio.nombre)}</option>`;
+                }).join('');
 
                 if (facturaId) {
                     const servicio = this.servicios.find(s => s.id === servicioId);
@@ -2744,6 +2828,7 @@
                             document.getElementById('factura-monto').value = factura.monto;
                             document.getElementById('factura-tipo').value = factura.tipo || 'mensual';
                             document.getElementById('factura-fecha').value = factura.fecha;
+                            selectServicio.value = servicioId;
 
                             if (factura.pagada && factura.fechaPago) {
                                 grupoFechaPago.style.display = 'block';
@@ -2768,6 +2853,7 @@
                 const tipo = document.getElementById('factura-tipo').value;
                 const fecha = document.getElementById('factura-fecha').value;
                 const fechaPago = document.getElementById('factura-fecha-pago').value;
+                const servicioSeleccionadoId = document.getElementById('factura-servicio').value;
 
                 if (!monto || isNaN(monto) || monto <= 0) {
                     this.mostrarToast('El monto debe ser un número mayor a 0', 'error');
@@ -2784,20 +2870,43 @@
                     return;
                 }
 
-                const servicio = this.servicios.find(s => s.id === this.servicioActual);
-                if (!servicio) return;
+                // Verificar si el servicio cambió
+                const servicioAnteriorId = this.servicioActual;
+                const servicioNuevoId = servicioSeleccionadoId;
+                const cambiodeServicio = servicioAnteriorId !== servicioNuevoId;
 
                 let esNueva = !this.facturaActual;
 
                 if (this.facturaActual) {
                     // Editar factura existente
-                    const factura = servicio.facturas.find(f => f.id === this.facturaActual);
-                    if (factura) {
-                        factura.monto = monto;
-                        factura.tipo = tipo;
-                        factura.fecha = fecha;
-                        if (fechaPago) {
-                            factura.fechaPago = fechaPago;
+                    const servicioAnterior = this.servicios.find(s => s.id === servicioAnteriorId);
+                    if (servicioAnterior) {
+                        const factura = servicioAnterior.facturas.find(f => f.id === this.facturaActual);
+                        if (factura) {
+                            if (cambiodeServicio) {
+                                // Mover la factura a otro servicio
+                                servicioAnterior.facturas = servicioAnterior.facturas.filter(f => f.id !== this.facturaActual);
+
+                                factura.monto = monto;
+                                factura.tipo = tipo;
+                                factura.fecha = fecha;
+                                if (fechaPago) {
+                                    factura.fechaPago = fechaPago;
+                                }
+
+                                const servicioNuevo = this.servicios.find(s => s.id === servicioNuevoId);
+                                if (servicioNuevo) {
+                                    servicioNuevo.facturas.push(factura);
+                                }
+                            } else {
+                                // Actualizar en el mismo servicio
+                                factura.monto = monto;
+                                factura.tipo = tipo;
+                                factura.fecha = fecha;
+                                if (fechaPago) {
+                                    factura.fechaPago = fechaPago;
+                                }
+                            }
                         }
                     }
                 } else {
@@ -2810,7 +2919,11 @@
                         pagada: false,
                         fechaPago: null
                     };
-                    servicio.facturas.push(nuevaFactura);
+
+                    const servicioDestino = this.servicios.find(s => s.id === servicioNuevoId);
+                    if (servicioDestino) {
+                        servicioDestino.facturas.push(nuevaFactura);
+                    }
                 }
 
                 this.guardarDatos();
@@ -2821,11 +2934,9 @@
                 // Re-renderizar todos los servicios para aplicar el ordenamiento
                 this.renderServicios();
 
-                // Actualizar el modal de facturas si está abierto
-                const modalFacturas = document.getElementById('modal-facturas-servicio');
-                if (modalFacturas.classList.contains('active') && modalFacturas.dataset.servicioId === this.servicioActual) {
-                    this.abrirModalFacturasServicio(this.servicioActual);
-                }
+                // Reabrir el modal del servicio correspondiente (nuevo o anterior)
+                const servicioParaAbrir = cambiodeServicio ? servicioNuevoId : servicioAnteriorId;
+                this.abrirModalFacturasServicio(servicioParaAbrir);
 
                 this.mostrarToast(esNueva ? 'Factura agregada' : 'Factura actualizada', 'success');
             }
@@ -3212,6 +3323,32 @@
                 document.body.style.overflow = '';
             }
 
+            toggleMenuAgregar() {
+                const menu = document.getElementById('menu-agregar');
+                const overlay = document.getElementById('menu-agregar-overlay');
+                menu.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+
+            cerrarMenuAgregar() {
+                const menu = document.getElementById('menu-agregar');
+                const overlay = document.getElementById('menu-agregar-overlay');
+                menu.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+
+            abrirModalFacturaRapida() {
+                // Si no hay servicios, mostrar mensaje y abrir modal de servicio
+                if (this.servicios.length === 0) {
+                    this.mostrarToast('Primero debes crear un servicio', 'error');
+                    this.abrirModalServicio();
+                    return;
+                }
+
+                // Abrir modal de factura con el primer servicio por defecto
+                this.abrirModalFactura(this.servicios[0].id, null);
+            }
+
             // ========================================
             // UTILIDADES
             // ========================================
@@ -3264,17 +3401,16 @@
 </html>
 
 <!--// ====================================================================
-    //                 NOTAS SISTEMA DeltaF VERSION 0.28
+    //                 NOTAS SISTEMA DeltaF VERSION 0.30
     // ====================================================================
     
      - PROMP:
-     1) Se agrega funcion ordenar
-     2) Se agrega busqueda
+     1) al modificar una fecha de pago no se actualiza el resumen de pagos, area
+     "pagados este mes" BUG CORREGIDO
 
 
      - bugs:
-     1) al modificar una fecha de pago no se actualiza el resumen de pagos, area
-     "pagados este mes"
+     1) 
 
 
     -->

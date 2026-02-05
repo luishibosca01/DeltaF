@@ -112,7 +112,6 @@
                 display: flex;
                 flex-direction: column;
                 gap: 1rem;
-                position: sticky;
                 top: 70px;
             }
 
@@ -1069,6 +1068,82 @@
             color: var(--text-main);
         }
 
+        /* --- Estilos Calculador --- */
+        .calculador-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .calculador-filtros {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .calculador-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .calculador-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .calculador-input {
+            cursor: text;
+        }
+
+        .calculador-select:focus,
+        .calculador-input:focus {
+            outline: none;
+            border-color: var(--input-focus);
+        }
+
+        .calculador-resultados {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .calculador-resultado-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+        }
+
+
+
+        .calculador-resultado-valor {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .calculador-resultado-destacado {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .calculador-resultado-destacado .calculador-resultado-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calculador-resultado-destacado .calculador-resultado-valor {
+            font-size: 1.5rem;
+        }
+
         /* Estado de factura */
         .factura-estado-pagado {
             color: var(--c-green);
@@ -1307,17 +1382,80 @@
             border-color: var(--c-green);
         }
 
+        /* --- Grupos de Facturas por Año --- */
+        .facturas-grupo-ano {
+            margin-bottom: none;
+        }
+
+        .facturas-grupo-header {
+            display: flex;
+            align-items: center;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin: 0.25rem 1rem 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .facturas-grupo-header:active {
+            transform: scale(0.98);
+        }
+
+        .facturas-grupo-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .facturas-grupo-ano-texto {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .facturas-grupo-contador {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding: 0.25rem 0.5rem;
+        }
+
+        .facturas-grupo-chevron {
+            transition: transform 0.2s;
+            color: var(--text-muted);
+        }
+
+        .facturas-grupo-chevron.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .facturas-grupo-contenido {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.2s;
+            opacity: 1;
+        }
+
+        .facturas-grupo-contenido.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
         /* --- codigo css --- */
     </style>
     <script>
         // Aplicar estado de tarjetas colapsables
         (function () {
             const estadisticasColapsadas = localStorage.getItem('estadisticas-collapsed') === 'true';
+            const calculadorColapsado = localStorage.getItem('calculador-collapsed') === 'true';
             const serviciosState = localStorage.getItem('servicios-collapse-state') || 'expanded';
 
             document.addEventListener('DOMContentLoaded', function () {
                 const estadisticasMes = document.getElementById('estadisticas-mes');
                 const estadisticasChevron = document.getElementById('estadisticas-chevron');
+                const calculadorContent = document.getElementById('calculador-content');
+                const calculadorChevron = document.getElementById('calculador-chevron');
                 const serviciosContent = document.getElementById('servicios-content');
                 const serviciosChevron = document.getElementById('servicios-chevron');
 
@@ -1327,6 +1465,14 @@
                 } else {
                     estadisticasMes.classList.add('collapsed');
                     estadisticasChevron.classList.add('collapsed');
+                }
+
+                // Aplicar estado de calculador
+                if (!calculadorColapsado) {
+                    calculadorContent.classList.remove('collapsed');
+                } else {
+                    calculadorContent.classList.add('collapsed');
+                    calculadorChevron.classList.add('collapsed');
                 }
 
                 // Aplicar estado de servicios
@@ -1514,7 +1660,7 @@
                 <svg class="icon">
                     <use href="#icon-dollar" />
                 </svg>
-                <span>Registro de ingresos</span>
+                <span>Ingresos</span>
                 <span id="ingresos-indicator" style="margin-left: auto; font-weight: 600;">✓</span>
             </div>
             <div class="menu-item" id="menu-exportar">
@@ -1553,7 +1699,7 @@
                 </svg>
                 Cerrar menú
             </button>
-            <div class="menu-version">Version 0.39</div> <!-- DeltaF -->
+            <div class="menu-version">Version 0.41</div> <!-- DeltaF -->
         </div>
     </div>
 
@@ -1583,6 +1729,76 @@
                         </svg>
                     </h2>
                     <div id="estadisticas-mes" class="collapsible-content collapsed"></div>
+                </div>
+
+                <!-- Tarjeta de Calculador -->
+                <div class="card card-fade-in" style="animation-delay: 0.25s;">
+                    <h2 class="card-header-collapsible" id="calculador-header">
+                        <span>
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="2"
+                                    fill="none" />
+                                <line x1="8" y1="6" x2="16" y2="6" stroke="currentColor" stroke-width="2" />
+                                <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="2" />
+                                <line x1="8" y1="14" x2="12" y2="14" stroke="currentColor" stroke-width="2" />
+                                <circle cx="15" cy="18" r="1.5" fill="currentColor" />
+                                <circle cx="11" cy="18" r="1.5" fill="currentColor" />
+                            </svg>
+                            Calculador
+                        </span>
+                        <svg class="icon chevron-icon" id="calculador-chevron" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </h2>
+                    <div id="calculador-content" class="collapsible-content collapsed">
+                        <div class="calculador-container">
+                            <div class="calculador-filtros">
+                                <div class="calculador-campo">
+                                    <label class="calculador-label">Servicio</label>
+                                    <select id="calculador-servicio" class="calculador-select">
+                                        <option value="">Seleccionar servicio...</option>
+                                    </select>
+                                </div>
+                                <div class="calculador-campo">
+                                    <label class="calculador-label">Desde</label>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <input type="date" id="calculador-desde" class="calculador-input"
+                                            style="flex: 1;">
+                                        <button type="button" id="btn-fecha-desde" class="icon-btn"
+                                            title="Fecha actual / Limpiar">
+                                            <svg class="icon">
+                                                <use href="#icon-calendar" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="calculador-campo">
+                                    <label class="calculador-label">Hasta</label>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <input type="date" id="calculador-hasta" class="calculador-input"
+                                            style="flex: 1;">
+                                        <button type="button" id="btn-fecha-hasta" class="icon-btn"
+                                            title="Fecha actual / Limpiar">
+                                            <svg class="icon">
+                                                <use href="#icon-calendar" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="calculador-resultados" class="calculador-resultados">
+                                <div class="calculador-resultado-item">
+                                    <span class="calculador-resultado-label">Total de registros</span>
+                                    <span class="calculador-resultado-valor" id="calculador-total-registros">0</span>
+                                </div>
+                                <div class="calculador-resultado-item">
+                                    <span class="calculador-resultado-label">Monto Total</span>
+                                    <span class="calculador-resultado-valor" id="calculador-monto-total">$0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1674,7 +1890,7 @@
             <svg class="icon">
                 <use href="#icon-dollar" />
             </svg>
-            <span>Agregar Recibo</span>
+            <span>Agregar Ingreso</span>
         </div>
     </div>
 
@@ -1683,7 +1899,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-servicio-titulo">Nuevo Servicio</h3>
-
             </div>
             <form id="form-servicio">
                 <div class="form-group">
@@ -1694,7 +1909,7 @@
                 <div class="form-actions">
                     <button type="button" id="btn-eliminar-servicio" style="display: none;">Eliminar</button>
                 </div>
-                <div class="form-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <div class="form-actions" style="display: grid; grid-template-columns: 1fr 1fr;">
                     <button type="submit">
                         <svg class="icon">
                             <use href="#icon-save" />
@@ -1763,7 +1978,7 @@
                     <label for="factura-fecha">Fecha de vencimiento</label>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="date" id="factura-fecha" required style="flex: 1;">
-                        <button type="button" class="icon-btn" id="btn-fecha-hoy" title="Fecha de hoy">
+                        <button type="button" class="icon-btn" id="btn-fecha-hoy" title="Fecha de hoy / Limpiar">
                             <svg class="icon">
                                 <use href="#icon-calendar" />
                             </svg>
@@ -1849,7 +2064,7 @@
                     <svg class="icon">
                         <use href="#icon-plus" />
                     </svg>
-                    Recibo
+                    Ingreso
                 </button>
                 <button type="button" onclick="app.cerrarModal('modal-ingresos-lista')">
                     <svg class="icon">
@@ -1865,7 +2080,7 @@
     <div class="modal" id="modal-ingreso">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modal-ingreso-titulo">Nuevo Recibo</h3>
+                <h3 id="modal-ingreso-titulo">Nuevo Ingreso</h3>
             </div>
             <form id="form-ingreso">
                 <div class="form-group">
@@ -1894,15 +2109,19 @@
                     <button type="submit"><svg class="icon">
                             <use href="#icon-save" />
                         </svg> Guardar</button>
-                    <button type="button" class="btn-secondary" id="modal-ingreso-close"><svg class="icon">
+                    <button type="button" id="btn-eliminar-ingreso" style="display: none;"><svg class="icon">
+                            <use href="#icon-broom" />
+                        </svg> Eliminar</button>
+                    <button type="button" class="btn-secondary" id="modal-ingreso-close" style="display: none;"><svg
+                            class="icon">
                             <use href="#icon-undo" />
                         </svg> Volver</button>
                 </div>
                 <div class="form-actions" style="margin-top: 0.5rem;">
-                    <button type="button" id="btn-eliminar-ingreso" style="width: 100%; display: none;"><svg
+                    <button type="button" class="btn-secondary" id="modal-ingreso-volver" style="width: 100%;"><svg
                             class="icon">
-                            <use href="#icon-broom" />
-                        </svg> Eliminar</button>
+                            <use href="#icon-undo" />
+                        </svg> Volver</button>
                 </div>
             </form>
         </div>
@@ -1977,6 +2196,12 @@
                 if (estadisticasColapsadas) {
                     document.getElementById('estadisticas-mes').classList.add('collapsed');
                     document.getElementById('estadisticas-chevron').classList.add('collapsed');
+                }
+                // Restaurar estado de calculador colapsado
+                const calculadorColapsado = localStorage.getItem('calculador-collapsed') === 'true';
+                if (calculadorColapsado) {
+                    document.getElementById('calculador-content').classList.add('collapsed');
+                    document.getElementById('calculador-chevron').classList.add('collapsed');
                 }
                 // Restaurar estado de servicios colapsados
                 const serviciosState = localStorage.getItem('servicios-collapse-state') || 'expanded';
@@ -2068,7 +2293,7 @@
                 });
                 document.getElementById('menu-agregar-recibo').addEventListener('click', () => {
                     this.cerrarMenuAgregar();
-                    this.abrirModalIngreso();
+                    this.abrirModalIngreso(null, true);
                 });
 
                 // Modales
@@ -2112,14 +2337,28 @@
                 document.getElementById('btn-ingreso-fecha-hoy').addEventListener('click', () => {
                     document.getElementById('ingreso-fecha').value = this.obtenerFechaLocal();
                 });
+
                 document.getElementById('modal-ingreso-close').addEventListener('click', () => {
                     this.cerrarModal('modal-ingreso');
-                    this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                    if (!this.ingresoDesdeMenu) {
+                        this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                    }
+                });
+                document.getElementById('modal-ingreso-volver').addEventListener('click', () => {
+                    this.cerrarModal('modal-ingreso');
+                    if (!this.ingresoDesdeMenu) {
+                        this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                    }
                 });
 
                 // Toggle de estadísticas colapsable
                 document.getElementById('estadisticas-header').addEventListener('click', () => {
                     this.toggleEstadisticas();
+                });
+
+                // Toggle de calculador colapsable
+                document.getElementById('calculador-header').addEventListener('click', () => {
+                    this.toggleCalculador();
                 });
 
                 // Toggle de servicios colapsable (3 estados)
@@ -2146,6 +2385,9 @@
                         }
                     }
                 });
+
+                // Inicializar calculador
+                this.inicializarCalculador();
 
                 // Atajo para escribir directamente en el buscador (solo desktop)
                 document.addEventListener('keydown', (e) => {
@@ -2625,6 +2867,129 @@
                 localStorage.setItem('estadisticas-collapsed', estaColapsado);
             }
 
+            toggleCalculador() {
+                const contenido = document.getElementById('calculador-content');
+                const chevron = document.getElementById('calculador-chevron');
+
+                contenido.classList.toggle('collapsed');
+                chevron.classList.toggle('collapsed');
+
+                // Guardar estado en localStorage
+                const estaColapsado = contenido.classList.contains('collapsed');
+                localStorage.setItem('calculador-collapsed', estaColapsado);
+            }
+
+            // ========================================
+            // CALCULADOR
+            // ========================================
+
+            inicializarCalculador() {
+                // Poblar select de servicios
+                this.actualizarSelectServicios();
+
+                // Event listeners
+                const selectServicio = document.getElementById('calculador-servicio');
+                const inputDesde = document.getElementById('calculador-desde');
+                const inputHasta = document.getElementById('calculador-hasta');
+                const btnFechaDesde = document.getElementById('btn-fecha-desde');
+                const btnFechaHasta = document.getElementById('btn-fecha-hasta');
+
+                selectServicio.addEventListener('change', () => this.calcularPeriodo());
+                inputDesde.addEventListener('change', () => this.calcularPeriodo());
+                inputHasta.addEventListener('change', () => this.calcularPeriodo());
+
+                // Botones de fecha actual/limpiar
+                btnFechaDesde.addEventListener('click', () => {
+                    if (inputDesde.value) {
+                        // Si hay valor, limpiar
+                        inputDesde.value = '';
+                    } else {
+                        // Si no hay valor, pegar fecha actual
+                        const hoy = new Date();
+                        inputDesde.value = hoy.toISOString().split('T')[0];
+                    }
+                    this.calcularPeriodo();
+                });
+
+                btnFechaHasta.addEventListener('click', () => {
+                    if (inputHasta.value) {
+                        // Si hay valor, limpiar
+                        inputHasta.value = '';
+                    } else {
+                        // Si no hay valor, pegar fecha actual
+                        const hoy = new Date();
+                        inputHasta.value = hoy.toISOString().split('T')[0];
+                    }
+                    this.calcularPeriodo();
+                });
+            }
+
+            actualizarSelectServicios() {
+                const select = document.getElementById('calculador-servicio');
+                if (!select) return;
+
+                // Crear opciones de servicios
+                let options = '<option value="">Seleccionar servicio...</option>';
+
+                this.servicios.forEach(servicio => {
+                    options += `<option value="${servicio.id}">${servicio.nombre}</option>`;
+                });
+
+                select.innerHTML = options;
+            }
+
+            calcularPeriodo() {
+                const selectServicio = document.getElementById('calculador-servicio');
+                const inputDesde = document.getElementById('calculador-desde');
+                const inputHasta = document.getElementById('calculador-hasta');
+
+                const servicioId = selectServicio.value;
+                const desde = inputDesde.value;
+                const hasta = inputHasta.value;
+
+                // Si no hay servicio seleccionado, mostrar 0
+                if (!servicioId) {
+                    document.getElementById('calculador-total-registros').textContent = '0';
+                    document.getElementById('calculador-monto-total').textContent = '$0,00';
+                    return;
+                }
+
+                // Encontrar el servicio
+                const servicio = this.servicios.find(s => s.id === servicioId);
+                if (!servicio) {
+                    document.getElementById('calculador-total-registros').textContent = '0';
+                    document.getElementById('calculador-monto-total').textContent = '$0,00';
+                    return;
+                }
+
+                // Filtrar facturas por rango de fechas
+                let facturasFiltradas = servicio.facturas;
+
+                if (desde) {
+                    const fechaDesde = new Date(desde + 'T00:00:00');
+                    facturasFiltradas = facturasFiltradas.filter(f => {
+                        const fechaFactura = new Date(f.fecha + 'T00:00:00');
+                        return fechaFactura >= fechaDesde;
+                    });
+                }
+
+                if (hasta) {
+                    const fechaHasta = new Date(hasta + 'T00:00:00');
+                    facturasFiltradas = facturasFiltradas.filter(f => {
+                        const fechaFactura = new Date(f.fecha + 'T00:00:00');
+                        return fechaFactura <= fechaHasta;
+                    });
+                }
+
+                // Calcular total
+                const totalRegistros = facturasFiltradas.length;
+                const montoTotal = facturasFiltradas.reduce((sum, f) => sum + f.monto, 0);
+
+                // Mostrar resultados
+                document.getElementById('calculador-total-registros').textContent = totalRegistros;
+                document.getElementById('calculador-monto-total').textContent = this.formatearMoneda(montoTotal);
+            }
+
             toggleServicios() {
                 // Si estamos en expanded y hay timer activo (clic rápido después de abrir botones)
                 if (this.serviciosCollapseState === 'expanded' && this.toggleServiciosTimer !== null) {
@@ -2941,13 +3306,17 @@
                 if (!this.enModoBusqueda) {
                     this.actualizarResumenMes();
                 }
+
+                // Actualizar select del calculador
+                this.actualizarSelectServicios();
             }
 
             crearServicioIngresos() {
                 const servicioIngresos = {
                     id: this.SERVICIO_INGRESOS_ID,
                     nombre: 'Ingresos',
-                    facturas: []
+                    facturas: [],
+                    activo: false  // ← AGREGADO: Deshabilitado por defecto
                 };
                 this.servicios.push(servicioIngresos);
                 this.guardarDatos();
@@ -3084,44 +3453,84 @@
                 if (servicio.facturas.length === 0) {
                     listaFacturas.innerHTML = '<p class="mensaje-sin-facturas">No hay facturas registradas</p>';
                 } else {
+                    // Ordenar facturas por fecha (más reciente primero)
                     const facturasOrdenadas = [...servicio.facturas].sort((a, b) => {
                         return new Date(b.fecha) - new Date(a.fecha);
                     });
 
-                    listaFacturas.innerHTML = facturasOrdenadas.map(factura => {
-                        let estadoPago = '';
-                        let claseMonto = 'factura-monto';
-
-                        // Saldo a favor (monto negativo)
-                        if (factura.monto < 0) {
-                            estadoPago = '<div class="factura-estado-pagado">Saldo a favor</div>';
-                            claseMonto = 'factura-monto factura-monto-favor';
-                        } else if (factura.pagada) {
-                            estadoPago = '<div class="factura-estado-pagado">✓ Pagada</div>';
-                        } else {
-                            const hoy = new Date();
-                            hoy.setHours(0, 0, 0, 0);
-                            const vencimiento = new Date(factura.fecha + 'T00:00:00');
-                            vencimiento.setHours(0, 0, 0, 0);
-
-                            if (vencimiento < hoy) {
-                                estadoPago = '<div class="factura-estado-vencido">⚠ Vencida</div>';
-                            } else {
-                                estadoPago = '<div class="factura-estado-pendiente">⏱ Pendiente</div>';
-                            }
+                    // Agrupar facturas por año
+                    const facturasPorAno = {};
+                    facturasOrdenadas.forEach(factura => {
+                        const ano = new Date(factura.fecha).getFullYear();
+                        if (!facturasPorAno[ano]) {
+                            facturasPorAno[ano] = [];
                         }
+                        facturasPorAno[ano].push(factura);
+                    });
+
+                    // Ordenar años de más reciente a más antiguo
+                    const anosOrdenados = Object.keys(facturasPorAno).sort((a, b) => b - a);
+
+                    // Generar HTML agrupado por año
+                    listaFacturas.innerHTML = anosOrdenados.map((ano, index) => {
+                        const facturas = facturasPorAno[ano];
+                        const cantidadFacturas = facturas.length;
+
+                        const facturasHTML = facturas.map(factura => {
+                            let estadoPago = '';
+                            let claseMonto = 'factura-monto';
+
+                            // Saldo a favor (monto negativo)
+                            if (factura.monto < 0) {
+                                estadoPago = '<div class="factura-estado-pagado">Saldo a favor</div>';
+                                claseMonto = 'factura-monto factura-monto-favor';
+                            } else if (factura.pagada) {
+                                estadoPago = '<div class="factura-estado-pagado">✓ Pagada</div>';
+                            } else {
+                                const hoy = new Date();
+                                hoy.setHours(0, 0, 0, 0);
+                                const vencimiento = new Date(factura.fecha + 'T00:00:00');
+                                vencimiento.setHours(0, 0, 0, 0);
+
+                                if (vencimiento < hoy) {
+                                    estadoPago = '<div class="factura-estado-vencido">⚠ Vencida</div>';
+                                } else {
+                                    estadoPago = '<div class="factura-estado-pendiente">⏱ Pendiente</div>';
+                                }
+                            }
+
+                            return `
+                    <div class="factura-item" data-id="${factura.id}">
+                        <div class="factura-info" onclick="app.editarFactura('${factura.id}')">
+                            <div class="${claseMonto}">${this.formatearMoneda(factura.monto)}</div>
+                            <div class="factura-fecha">
+                                ${factura.tipo || 'mensual'} | Vence: ${this.formatearFecha(factura.fecha)}
+                            </div>
+                            ${estadoPago}
+                        </div>
+                    </div>
+                `;
+                        }).join('');
+
+                        // Solo el primer año (más reciente) está expandido por defecto
+                        const collapsed = index > 0 ? 'collapsed' : '';
 
                         return `
-                            <div class="factura-item" data-id="${factura.id}">
-                                <div class="factura-info" onclick="app.editarFactura('${factura.id}')">
-                             <div class="${claseMonto}">${this.formatearMoneda(factura.monto)}</div>
-                             <div class="factura-fecha">
-                                 ${factura.tipo || 'mensual'} | Vence: ${this.formatearFecha(factura.fecha)}
-                             </div>
-                             ${estadoPago}
-                         </div>
-                            </div>
-                        `;
+                <div class="facturas-grupo-ano">
+                    <div class="facturas-grupo-header" onclick="app.toggleGrupoAno(this)">
+                        <div class="facturas-grupo-header-info">
+                            <span class="facturas-grupo-ano-texto">${ano}</span>
+                            <span class="facturas-grupo-contador">${cantidadFacturas} factura${cantidadFacturas !== 1 ? 's' : ''}</span>
+                        </div>
+                        <svg class="icon facturas-grupo-chevron ${collapsed}" viewBox="0 0 24 24">
+                            <polyline points="6 9 12 15 18 9" class="icon-line" stroke="currentColor"></polyline>
+                        </svg>
+                    </div>
+                    <div class="facturas-grupo-contenido ${collapsed}">
+                        ${facturasHTML}
+                    </div>
+                </div>
+            `;
                     }).join('');
                 }
 
@@ -3129,6 +3538,14 @@
                 modal.dataset.servicioId = servicioId;
 
                 this.abrirModal('modal-facturas-servicio');
+            }
+
+            toggleGrupoAno(headerElement) {
+                const chevron = headerElement.querySelector('.facturas-grupo-chevron');
+                const contenido = headerElement.nextElementSibling;
+
+                chevron.classList.toggle('collapsed');
+                contenido.classList.toggle('collapsed');
             }
 
             abrirModalServicio(servicioId = null) {
@@ -3544,7 +3961,14 @@
             }
 
             establecerFechaHoy() {
-                document.getElementById('factura-fecha').value = this.obtenerFechaLocal();
+                const inputFecha = document.getElementById('factura-fecha');
+                if (inputFecha.value) {
+                    // Si hay valor, limpiar
+                    inputFecha.value = '';
+                } else {
+                    // Si no hay valor, pegar fecha actual
+                    inputFecha.value = this.obtenerFechaLocal();
+                }
             }
 
             eliminarFacturaDesdeModal() {
@@ -4196,48 +4620,95 @@
                 const modal = document.getElementById('modal-ingresos-lista');
                 const lista = document.getElementById('lista-ingresos-modal');
 
-                // Ordenar ingresos por fecha (más reciente primero)
-                const ingresosOrdenados = [...servicio.facturas].sort((a, b) => {
-                    return new Date(b.fecha) - new Date(a.fecha);
-                });
-
-                if (ingresosOrdenados.length === 0) {
+                if (servicio.facturas.length === 0) {
                     lista.innerHTML = `
-                        <div class="empty-state">
-                            <p>No hay ingresos registrados</p>
-                        </div>
-                    `;
+            <div class="empty-state">
+                <p>No hay ingresos registrados</p>
+            </div>
+        `;
                 } else {
-                    lista.innerHTML = ingresosOrdenados.map(ingreso => {
-                        const tipoTexto = ingreso.tipo === 'complementario' ? 'Complementario' : 'Regular';
-                        const tipoEmoji = ingreso.tipo === 'complementario' ? '💼' : '💵';
+                    // Ordenar ingresos por fecha (más reciente primero)
+                    const ingresosOrdenados = [...servicio.facturas].sort((a, b) => {
+                        return new Date(b.fecha) - new Date(a.fecha);
+                    });
+
+                    // Agrupar ingresos por año
+                    const ingresosPorAno = {};
+                    ingresosOrdenados.forEach(ingreso => {
+                        const ano = new Date(ingreso.fecha).getFullYear();
+                        if (!ingresosPorAno[ano]) {
+                            ingresosPorAno[ano] = [];
+                        }
+                        ingresosPorAno[ano].push(ingreso);
+                    });
+
+                    // Ordenar años de más reciente a más antiguo
+                    const anosOrdenados = Object.keys(ingresosPorAno).sort((a, b) => b - a);
+
+                    // Generar HTML agrupado por año
+                    lista.innerHTML = anosOrdenados.map((ano, index) => {
+                        const ingresos = ingresosPorAno[ano];
+                        const cantidadIngresos = ingresos.length;
+
+                        const ingresosHTML = ingresos.map(ingreso => {
+                            const tipoTexto = ingreso.tipo === 'complementario' ? 'Complementario' : 'Regular';
+                            const tipoEmoji = ingreso.tipo === 'complementario' ? '💼' : '💵';
+
+                            return `
+                    <div class="factura-item" data-id="${ingreso.id}">
+                        <div class="factura-info" onclick="app.abrirModalIngreso('${ingreso.id}')">
+                            <div class="factura-monto">${this.formatearMoneda(ingreso.monto)}</div>
+                            <div class="factura-fecha">
+                                ${tipoEmoji} ${tipoTexto} | Cobrado: ${this.formatearFecha(ingreso.fecha)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                        }).join('');
+
+                        // Solo el primer año (más reciente) está expandido por defecto
+                        const collapsed = index > 0 ? 'collapsed' : '';
 
                         return `
-                            <div class="factura-item" data-id="${ingreso.id}">
-                                <div class="factura-info" onclick="app.abrirModalIngreso('${ingreso.id}')">
-                                    <div class="factura-monto">${this.formatearMoneda(ingreso.monto)}</div>
-                                    <div class="factura-fecha">
-                                        ${tipoEmoji} ${tipoTexto} | Cobrado: ${this.formatearFecha(ingreso.fecha)}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                <div class="facturas-grupo-ano">
+                    <div class="facturas-grupo-header" onclick="app.toggleGrupoAno(this)">
+                        <div class="facturas-grupo-header-info">
+                            <span class="facturas-grupo-ano-texto">${ano}</span>
+                            <span class="facturas-grupo-contador">${cantidadIngresos} ingreso${cantidadIngresos !== 1 ? 's' : ''}</span>
+                        </div>
+                        <svg class="icon facturas-grupo-chevron ${collapsed}" viewBox="0 0 24 24">
+                            <polyline points="6 9 12 15 18 9" class="icon-line" stroke="currentColor"></polyline>
+                        </svg>
+                    </div>
+                    <div class="facturas-grupo-contenido ${collapsed}">
+                        ${ingresosHTML}
+                    </div>
+                </div>
+            `;
                     }).join('');
                 }
 
                 this.abrirModal('modal-ingresos-lista');
             }
 
-            abrirModalIngreso(ingresoId = null) {
+            abrirModalIngreso(ingresoId = null, desdeMenu = false) {
                 this.cerrarModal('modal-ingresos-lista');
                 this.ingresoActual = ingresoId;
+                this.ingresoDesdeMenu = desdeMenu;
 
                 const modal = document.getElementById('modal-ingreso');
                 const titulo = document.getElementById('modal-ingreso-titulo');
                 const form = document.getElementById('form-ingreso');
                 const btnEliminar = document.getElementById('btn-eliminar-ingreso');
+                const btnVolverGrid = document.getElementById('modal-ingreso-close');
+                const btnVolverFull = document.getElementById('modal-ingreso-volver');
 
                 form.reset();
+
+                // Cambiar texto del botón según origen
+                const textoBoton = desdeMenu ? 'Cerrar' : 'Volver';
+                btnVolverGrid.innerHTML = `<svg class="icon"><use href="#icon-${desdeMenu ? 'cancel' : 'undo'}" /></svg> ${textoBoton}`;
+                btnVolverFull.innerHTML = `<svg class="icon"><use href="#icon-${desdeMenu ? 'cancel' : 'undo'}" /></svg> ${textoBoton}`;
 
                 if (ingresoId) {
                     // Modo editar
@@ -4245,17 +4716,21 @@
                     if (servicio) {
                         const ingreso = servicio.facturas.find(f => f.id === ingresoId);
                         if (ingreso) {
-                            titulo.textContent = 'Editar Recibo';
+                            titulo.textContent = 'Editar Ingreso';
                             document.getElementById('ingreso-monto').value = ingreso.monto;
                             document.getElementById('ingreso-tipo').value = ingreso.tipo || 'regular';
                             document.getElementById('ingreso-fecha').value = ingreso.fecha;
                             btnEliminar.style.display = 'block';
+                            btnVolverGrid.style.display = 'none';
+                            btnVolverFull.style.display = 'block';
                         }
                     }
                 } else {
                     // Modo nuevo
-                    titulo.textContent = 'Nuevo Recibo';
+                    titulo.textContent = 'Nuevo Ingreso';
                     btnEliminar.style.display = 'none';
+                    btnVolverGrid.style.display = 'block';
+                    btnVolverFull.style.display = 'none';
                 }
 
                 this.abrirModal('modal-ingreso');
@@ -4321,7 +4796,9 @@
                 this.guardarEstado();
                 this.renderServicios();
                 this.cerrarModal('modal-ingreso');
-                this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                if (!this.ingresoDesdeMenu) {
+                    this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                }
                 this.mostrarToast(this.ingresoActual ? 'Ingreso actualizado' : 'Ingreso agregado', 'success');
             }
 
@@ -4334,7 +4811,9 @@
                     this.guardarEstado();
                     this.renderServicios();
                     this.cerrarModal('modal-ingreso');
-                    this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                    if (!this.ingresoDesdeMenu) {
+                        this.abrirModalIngresosLista(this.SERVICIO_INGRESOS_ID);
+                    }
                     this.mostrarToast('Ingreso eliminado', 'success');
                 }
             }
@@ -4375,11 +4854,11 @@
 </html>
 
 <!--// ====================================================================
-    //                 NOTAS SISTEMA DeltaF VERSION 0.39
+    //                 NOTAS SISTEMA DeltaF VERSION 0.40
     // ====================================================================
     
      - CAMBIOS:
-     1) Se agrega atajao a agregar recibo
+     1)
 
 
      - BUGS:
